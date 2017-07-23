@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    ant-buildfile for commandline, web application and web service
+    @(#) $Id: build.xml 967 2012-08-29 18:22:10Z gfis $
+    2017-07-22, Georg Fischer: copied from xtrans
+
+-->
+<!--
+ * Copyright 2017 Dr. Georg Fischer <punctum at punctum dot kom>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<project name="putrans" default="all" basedir=".">
+    <!-- the 5 needed for build-import.xml -->
+    <property name="app.name"           value="putrans" />
+    <property name="app.version"        value="10.0" />
+    <property name="app.main-class"     value="org.teherba.putrans.Converter"/>
+    <property name="tomcat.base"        value="/var/lib/tomcat" />
+    <property name="tomcat.home"        value="/usr/share/tomcat" />
+    <import file="build-import.xml" />
+
+    <property name="pipeClass"      value="org.teherba.putrans.Converter"/>
+
+    <target name="core.jar">
+        <!-- without libraries, without web files
+        -->
+        <jar jarfile="${dist.home}/${ant.project.name}-core.jar"
+                basedir="${build.classes}"
+                manifest="${build.classes}/META-INF/MANIFEST.MF"
+                >
+                <include name="**/*.class"/>
+                <exclude name="**/web/*.class"/>
+                <exclude name="**/*Servlet.class"/>
+        </jar>
+    </target>
+
+    <target name="fill.lib">
+        <copy todir="${lib.home}">
+            <fileset dir="${tomcat.base}/openlib">
+                <include name="common-core.jar" />
+                <include name="commons-logging-1.2.jar" />
+                <include name="commons-fileupload-1.3.2.jar" />
+                <include name="commons-io-2.5.jar" />
+                <include name="log4j-1.2.17.jar" />
+                <include name="xtrans-core.jar" />
+            </fileset>
+        </copy>
+    </target>
+
+    <!-- as long as xtrans sources are compiled into putrans -->
+    <target name="copy.putrans">
+        <copy toDir="src/main/java/org/teherba/xtrans">
+            <fileset dir="../xtrans/src/main/java/org/teherba/xtrans">
+                <include name="MainTransformer.java"       />
+            </fileset>          
+        </copy>
+    </target>
+<!--
+-->
+    <!-- ============= Source Code Generation =============================
+    -->
+    <target name="generate" depends="gen.pack">
+    </target>
+
+    <!--
+        generate package descriptions
+    -->
+    <target name="gen.pack" depends="">
+        <java classname="org.teherba.putrans.PutransFactory"
+                classpathref="compile.classpath" fork="true" >
+        </java>
+    </target>
+
+    <target name="test"      depends="test.camt" />
+
+    <target name="test.camt" depends="test.camt.1,test.camt.2" />
+    <target name="test.camt.1">
+        <java classname="org.teherba.xtrans.MainTransformer" classpathref="compile.classpath"
+                fork="true">
+            <arg value="-mt940" />
+            <arg value="-xml" />
+            <arg value="${test.home}/finance/swift/940.4.txt" />
+            <arg value="${test.home}/finance/swift/940.4.txt.xml" />
+            <arg line="-iso true" />
+            <jvmarg value="-Djaxp.debug=false"/>
+        </java>
+    </target>
+    <target name="test.camt.2">
+        <xslt in="${test.home}/finance/swift/940.4.txt.xml" style="${web.home}/xslt/mt940-camt.052.xsl"
+                out="${test.home}/finance/swift/camt.052.4.xml"
+        />
+    </target>
+
+    <target name="test.sasb">
+        <antcall target="sub.inout">
+            <param name="format" value="extra"      /><param name="file" value="grammar/sasb.grm" />
+            <param name="opt1"   value=" "          /><param name="opt2" value=" "    />
+        </antcall>
+    </target>
+    <!-- sub.inout2 ************************************
+         similiar to sub.inout, but with additional pipe through token file
+   -->
+    <target name="sub.inout2">
+        <echo message="Transformer -${format} -xml ${opt1} ${opt2} ${test.home}/${file}" />
+        <java classname="org.teherba.xtrans.MainTransformer" classpathref="compile.classpath"
+                fork="true">
+            <arg value="-${format}" />
+            <arg value="-xml" />
+            <arg value="${test.home}/${file}" />
+            <arg value="${test.home}/${file}.xml" />
+            <arg line="${opt1} ${opt2}" />
+            <jvmarg value="-Djaxp.debug=false"/>
+        </java>
+        <java classname="org.teherba.xtrans.MainTransformer" classpathref="compile.classpath"
+                fork="true">
+            <arg value="-xml" />
+            <arg value="-${format}" />
+            <arg value="${test.home}/${file}.xml" />
+            <arg value="${test.home}/${file}.tmp" />
+            <arg line="${opt1} ${opt2}" />
+            <jvmarg value="-Djaxp.debug=false"/>
+        </java>
+        <condition property="sub.bad.xml" >
+            <not>
+                <filesmatch file1="${test.home}/${file}" file2="${test.home}/${file}.tmp" />
+            </not>
+        </condition>
+        <antcall target="sub.message.xml">
+            <param name="format" value="${format}" />
+            <param name="file"   value="${test.home}/${file}" />
+        </antcall>
+
+        <echo message="Transformer -${format} -token ${opt1} ${opt2} ${test.home}/${file}" />
+        <java classname="org.teherba.xtrans.MainTransformer" classpathref="compile.classpath"
+                fork="true">
+            <arg value="-${format}" />
+            <arg value="-token" />
+            <arg value="${test.home}/${file}" />
+            <arg value="${test.home}/${file}.tsv" />
+            <arg line="${opt1} ${opt2}" />
+            <jvmarg value="-Djaxp.debug=false"/>
+        </java>
+        <java classname="org.teherba.xtrans.MainTransformer" classpathref="compile.classpath"
+                fork="true">
+            <arg value="-token" />
+            <arg value="-${format}" />
+            <arg value="${test.home}/${file}.tsv" />
+            <arg value="${test.home}/${file}.tok" />
+            <arg line="${opt1} ${opt2}" />
+            <jvmarg value="-Djaxp.debug=false"/>
+        </java>
+        <condition property="sub.bad.tok" >
+            <not>
+                <filesmatch file1="${test.home}/${file}" file2="${test.home}/${file}.tok" />
+            </not>
+        </condition>
+        <antcall target="sub.message.tok">
+            <param name="format" value="${format}" />
+            <param name="file"   value="${test.home}/${file}" />
+        </antcall>
+    </target>
+
+    <!-- sub.message.* ************************************ -->
+    <target name="sub.message.xml" if="sub.bad.xml">
+        <echo message="Test of -${format} / -xml failed, c.f. ${file}(.tmp)" />
+        <exec dir="${basedir}" executable="diff">
+            <arg value="-w" /><!-- ignore all whitespace -->
+            <arg value="${file}" />
+            <arg value="${file}.tmp" />
+        </exec>
+    </target>
+    <target name="sub.message.tok" if="sub.bad.tok">
+        <echo message="Test of -${format} / -token failed, c.f. ${file}(.tok)" />
+        <exec dir="${basedir}" executable="diff">
+            <arg value="-w" /><!-- ignore all whitespace -->
+            <arg value="${file}" />
+            <arg value="${file}.tok" />
+        </exec>
+    </target>
+
+</project>

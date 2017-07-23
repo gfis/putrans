@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://java.sun.com/xml/ns/javaee" 
+        xmlns:application="http://java.sun.com/xml/ns/javaee/application_5.xsd"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/j2ee/application_5.xsd" 
+        version="5"
+        >
+<!--
+    J2EE application descriptor 
+    @(#) $Id: 77d02f9fd6df5498c3b2a6fe74b616c88d4f4b7b $
+    2017-07-22, Georg Fischer: copied from xtrans
+-->
+    <description>Putrans - Text Processing System Converters</description>
+    <display-name>Putrans</display-name>
+
+    <module>
+        <web>
+            <web-uri>putrans.war</web-uri>
+            <context-root>/putrans</context-root>
+        </web>
+    </module>
+</application>
