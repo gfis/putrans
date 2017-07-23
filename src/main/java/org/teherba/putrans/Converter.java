@@ -40,13 +40,12 @@ public class Converter extends MainTransformer {
     public Logger log;
     
     /** Factory delivering transformers for different input and output file formats */
-    private PutransFactory factory;
+    // private PutransFactory factory;
   
     /** Constructor
      */
     public Converter() {
         log = Logger.getLogger(Converter.class.getName());
-        factory = new PutransFactory();
         // System.out.println(factory.toString());
     } // Constructor 0
 
@@ -55,6 +54,7 @@ public class Converter extends MainTransformer {
      */
     public static void main(String args[]) {
         Converter converter = new Converter();
+        converter.factory = new PutransFactory();
         converter.processFile(args);
     } // main
 

@@ -1,0 +1,37 @@
+/*	stylesheet.css - Cascaded Style Sheet
+	@(#) $Id: stylesheet.css 9 2008-09-05 05:21:15Z gfis $
+	2007-10-12: same for all sample applications
+	2006-06-09: colored morphology
+	2005-08-18: copied from html/gfis.css
+	2003-07-25:	body font-family
+	2003-03-22:	without HTML comments and tags
+	2000-11-20,	Georg Fischer
+*/
+.Ab { color:white    ; background-color: goldenrod  }
+.Aj { color:black    ; background-color: lightblue  }
+.Ar { color:white    ; background-color: green      }
+.Av { color:black    ; background-color: red        }
+.Cc { color:lightred ; background-color: yellow     }
+.Cj { color:blue     ; background-color: yellow     }
+.Er { color:white    ; background-color: black      }
+.Ir { color:green    ; background-color: yellow     }
+.Nm { color:blue     ; background-color: chartreuse }
+.Nu { color:black    ; background-color: yellow     }
+.Pn { color:white    ; background-color: crimson    }
+.Pr { color:red      ; background-color: yellow     }
+.Rp { color:black    ; background-color: yellow     }
+.Sb { color:black    ; background-color: pink       }
+.Un { color:white    ; background-color: gray       }
+.Vb { color:yellow   ; background-color: blue       }
+
+body,p,h1,h2,h3,h4,dl,dd,dt,ul,ol,li,td,th,address,blockquote,b,i,a,br,img
+	{ font-family:Verdana,Arial,sans-serif; }
+tt,pre
+	{ font-family:Courier; }
+dt	
+	{ font-weight: bold }
+td
+	{ vertical-align:top }
+body
+	{ background-color:lightyellow }
+

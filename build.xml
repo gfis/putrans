@@ -59,6 +59,7 @@
     </target>
 
     <!-- as long as xtrans sources are compiled into putrans -->
+<!--
     <target name="copy.putrans">
         <copy toDir="src/main/java/org/teherba/xtrans">
             <fileset dir="../xtrans/src/main/java/org/teherba/xtrans">
@@ -66,7 +67,6 @@
             </fileset>          
         </copy>
     </target>
-<!--
 -->
     <!-- ============= Source Code Generation =============================
     -->

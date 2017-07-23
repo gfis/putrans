@@ -52,7 +52,6 @@ public class PutransFactory extends XtransFactory {
     public PutransFactory() {
         super();
         log        = Logger.getLogger(PutransFactory.class.getName());
-        
         realPath   = "";
         saxFactory = getSAXFactory();
         try {
@@ -60,8 +59,9 @@ public class PutransFactory extends XtransFactory {
             // the order here defines the order in documentation.jsp,
             // should be: "... group by package order by package, name"
 
-            this.enable("xtrans.HexDumpTransformer");
-            this.enable("xtrans.SeparatedTransformer");
+            this.enable("putrans.conv.IBM6788Converter");
+            this.enable("xtrans.general.HexDumpTransformer");
+            this.enable("xtrans.general.SeparatedTransformer");
             this.enable("xtrans.XMLTransformer");
         } catch (Exception exc) {
             log.error(exc.getMessage(), exc);
@@ -79,7 +79,8 @@ public class PutransFactory extends XtransFactory {
             BaseTransformer transformer = (BaseTransformer) Class.forName("org.teherba."
                     + transformerName).newInstance();
             if (transformer != null) {
-                // transformer.initialize();
+                transformer.initialize();
+                // System.err.println(transformerName + " enabled");
                 transformers.add(transformer);
             } // != null
         } catch (Exception exc) {

@@ -38,7 +38,7 @@ recr1:
 	grep -E '> FAILED' $(TESTDIR)/regression*.log | cut -f 3 -d ' ' | xargs -l -ißß rm -v test/ßß.prev.tst
 regr2:
 	make regression TEST=$(TEST) > x.tmp
-#--------------------------------------------------
+#---------------------------------------------------
 # test whether all defined tests in all.tests have *.prev.tst results and vice versa
 check_tests:
 	grep -E "^TEST" $(TESTDIR)/all.tests | cut -b 6-8 | sort | uniq -c > $(TESTDIR)/tests_formal.tmp
@@ -49,3 +49,8 @@ jfind:
 	find src -iname "*.java" | xargs -l grep -H $(JF)
 rmbak:
 	find src -iname "*.bak"  | xargs -l rm -v
+#---------------------------------------------------
+test1:
+	$(JAR) -ibm6788 -ibm6788 ../../pt/tx/test/6788/DOCUM002.TXT
+traub1:
+	$(JAR) -ibm6788 test/DOCUM001.TXT -xml x.tmp
