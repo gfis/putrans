@@ -51,6 +51,15 @@ rmbak:
 	find src -iname "*.bak"  | xargs -l rm -v
 #---------------------------------------------------
 test1:
-	$(JAR) -ibm6788 -ibm6788 ../../pt/tx/test/6788/DOCUM002.TXT
+	$(JAR) -ibm6788 ../../pt/disk/test/6788.1/DOCUM002.TXT | tee x.tmp
 traub1:
-	$(JAR) -ibm6788 test/DOCUM001.TXT -xml x.tmp
+	$(JAR) -ibm6788 test/traub1/DOCUM001.TXT               | tee x.tmp
+batch: b1 b2 b3 b4
+b1:
+	find test -iname "*.xml"         | xargs -l rm -v
+b2:
+	find test -type f -iname "*.txt" | xargs -t -l -iﬂﬂ java -jar dist/putrans.jar -ibm6788 ﬂﬂ ﬂﬂ.xml
+b3:
+	find test -iname "*.xml"         | xargs -l grep -aiH " head.6788"
+b4:
+	find test -iname "*.xml"         | xargs -l grep -aiH " title.6788"
