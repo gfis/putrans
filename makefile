@@ -51,9 +51,9 @@ rmbak:
 	find src -iname "*.bak"  | xargs -l rm -v
 #---------------------------------------------------
 test1:
-	$(JAR) -ibm6788 ../../pt/disk/test/6788.1/DOCUM002.TXT | tee x.tmp
+	$(JAR) -ibm6788 ../../pt/disk/test/6788.1/DOCUM002.TXT | tee x.html
 traub1:
-	$(JAR) -ibm6788 test/traub1/DOCUM001.TXT               | tee x.tmp
+	$(JAR) -ibm6788 test/traub1/DOCUM001.TXT               | tee x.html
 batch: b1 b2 b3 b4
 b1:
 	find test -iname "*.xml"         | xargs -l rm -v

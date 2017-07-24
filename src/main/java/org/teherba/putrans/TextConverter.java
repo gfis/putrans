@@ -22,6 +22,7 @@ package org.teherba.putrans;
 import  org.teherba.xtrans.ByteRecord;
 import  org.teherba.xtrans.ByteTransformer;
 import  org.xml.sax.Attributes;
+import  org.xml.sax.helpers.AttributesImpl;
 import  org.xml.sax.SAXException;
 import  org.apache.log4j.Logger;
 
@@ -115,6 +116,7 @@ public class TextConverter extends ByteTransformer {
         content = new StringBuffer(2048);
         lineNo  = 0;
         state   = 0;
+        ptx     = new Ptx();
     } // initialize
 
     /** Emits document text, and writes its characters
@@ -218,9 +220,9 @@ public class TextConverter extends ByteTransformer {
     /*===========================*/
 
     /** Status for paragraph end */
-    /* parameter 'status' of 'put_bold', 'put_italic' etc. */
-    protected static final int ptx_on        = 1;
+    /* parameter 'status' of 'put_bold', 'put_italic', put_underline' etc. */
     protected static final int ptx_off       = 0;
+    protected static final int ptx_on        = 1;
     
     /* Parameter 'status of 'put_line', 'put_space', 'put_hyphen' */
     protected static final int ptx_soft      = 1;
@@ -230,24 +232,93 @@ public class TextConverter extends ByteTransformer {
     protected static final int ptx_normal    = 5;                
     protected static final int ptx_break     = 6; /* similiar to hard */
 
+    /** The parameter block for the functional text processing interface
+     */
+    protected class Ptx {
+        public int bold;
+        public int underline;
+        public Ptx() {
+            bold      = 0;
+            underline = 0;
+        }
+    } // inner class Ptx
+
+    /** Instance of the parameter block */
+    protected Ptx ptx;
+        
+    /** Starts or ends bold text
+     *  @param status off or on 
+     */
+    protected void put_bold(int status) {
+        fireContent();
+        switch (status) {
+            case 0:
+                if (ptx.bold >  0) {
+                    fireEndElement("strong");
+                } 
+                break;
+            default:
+                if (ptx.bold == 0) {
+                    fireStartElement("strong");
+                }
+                break;
+        } // switch status
+        ptx.bold = status;
+    } // put_bold
+
     /** Emits a newline
      *  @param status one of the codes ptx_soft, ptx_hard and so on.
      */
-    protected void putLine(int status) {
+    protected void put_line(int status) {
         switch (status) {
             case ptx_soft:
                 break;
             default:
                 content.append("\r\n");
+            	fireContent();
+            	fireEmptyElement("br");
                 break;
         } // switch status
-    } // putLine
+    } // put_line
 
     /** Emits a tab
      */
-    protected void putTab() {
+    protected void put_tab() {
         content.append("\t");
-    } // putLine
+    } // put_tab
+
+    /** Starts or ends underlined text
+     *  @param status off or on with some variant:
+     *  <pre>
+     *  0 = off,
+     *  1 = continuous single on (default),
+     *  2 = continuous double,
+     *  3 = wordwise   single,
+     *  4 = wordwise   double  (same as continuous in RTF)
+     *  </pre>
+     */
+    protected void put_underline(int status) {
+        fireContent();
+        switch (status) {
+            case 0:
+                if (ptx.underline >  0) {
+                    fireEndElement("u");
+                } 
+                break;
+            default:
+                if (ptx.underline == 0) {
+                    if (status == 1) {
+                        fireStartElement("u");
+                    } else {
+                        AttributesImpl attrs = new AttributesImpl();
+                        attrs.addAttribute("", "s", "s", "CDATA", Integer.toString(status));
+                        fireStartElement("u", attrs);
+                    }
+                }
+                break;
+        } // switch status
+        ptx.underline = status;
+    } // put_underline
 
     /*===========================*/
     /* SAX handler for XML input */
