@@ -56,10 +56,11 @@ traub1:
 	$(JAR) -ibm6788 test/traub1/DOCUM001.TXT               | tee x.html
 batch: b1 b2 b3 b4
 b1:
-	find test -iname "*.xml"         | xargs -l rm -v
+	find test -iname "*.*ml"         | xargs -l rm -v
 b2:
-	find test -type f -iname "*.txt" | xargs -t -l -iﬂﬂ java -jar dist/putrans.jar -ibm6788 ﬂﬂ ﬂﬂ.xml
+	find test/others -type f -iname "*.txt" | xargs -t -l -iﬂﬂ java -jar dist/putrans.jar \
+	-enc1 ISO-8859-1 -enc2 ISO-8859-1 -ibm6788 ﬂﬂ ﬂﬂ.html
 b3:
-	find test -iname "*.xml"         | xargs -l grep -aiH " head.6788"
+	find test -iname "*.*ml"         | xargs -l grep -aiH " head.6788"
 b4:
-	find test -iname "*.xml"         | xargs -l grep -aiH " title.6788"
+	find test -iname "*.*ml"         | xargs -l grep -aiH " title.6788"

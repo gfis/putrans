@@ -46,9 +46,9 @@ public class TextConverter extends ByteTransformer {
     /** Body element tag */
     protected static final String BODY_TAG        = "body";
     /** Byte element tag */
-    protected static final String BYTE_TAG        = "bx";
+    protected static final String PRE_TAG         = "pre";
     /** Header element tag */
-    protected static final String HEAD_TAG        = "header";
+    protected static final String HEAD_TAG        = "head";
     /** Markup element tag */
     protected static final String MARKUP_TAG      = "markup";
     /** Ruler element tag */
@@ -57,6 +57,8 @@ public class TextConverter extends ByteTransformer {
     protected static final String PROP_TEXT_TAG   = "propText";
     /** Text line element tag */
     protected static final String TEXT_TAG        = "text";
+    /** Byte element tag */
+    protected static final String BYTE_TAG        = "bx";
     /** Word element tag */
     protected static final String WORD_TAG        = "wx";
     /** Attribute name for leading spaces */
@@ -85,7 +87,7 @@ public class TextConverter extends ByteTransformer {
     protected int rulerPair;
 
     /** Buffer for a portion of the input file */
-    protected byte[] byteBuffer;
+    // protected byte[] byteBuffer;
     
     /** Record for the reader's buffer */
     protected ByteRecord genRecord;
@@ -198,12 +200,16 @@ public class TextConverter extends ByteTransformer {
             fireStartDocument();
             fireStartRoot(ROOT_TAG);
             fireLineBreak();
-            fireStartRoot(BODY_TAG);
+            fireStartElement(BODY_TAG);
+            fireLineBreak();
+            fireStartElement(PRE_TAG);
             fireLineBreak();
             while ((len = genRecord.read(byteReader)) >= 0) {
                 len = processInput(0, len);
             } // while reading
             fireContent();
+            fireEndElement(PRE_TAG);
+            fireLineBreak();
             fireEndElement(BODY_TAG);
             fireLineBreak();
             fireEndElement(ROOT_TAG);
@@ -219,25 +225,31 @@ public class TextConverter extends ByteTransformer {
     /* Text processing interface */
     /*===========================*/
 
-    /** Status for paragraph end */
-    /* parameter 'status' of 'put_bold', 'put_italic', put_underline' etc. */
+    // parameter 'status' of 'put_bold', 'put_italic', put_underline' etc.
     protected static final int ptx_off       = 0;
     protected static final int ptx_on        = 1;
-    
-    /* Parameter 'status of 'put_line', 'put_space', 'put_hyphen' */
+    // Parameter 'status of 'put_line', 'put_space', 'put_hyphen'
     protected static final int ptx_soft      = 1;
     protected static final int ptx_hard      = 2;
     protected static final int ptx_soft_eol  = 3;
     protected static final int ptx_paragraph = 4;
     protected static final int ptx_normal    = 5;                
-    protected static final int ptx_break     = 6; /* similiar to hard */
+    protected static final int ptx_break     = 6; // similiar to hard 
+    // Parameter 'status of 'put_align'
+    protected static final int ptx_left      = 0; // start aligned (default)
+    protected static final int ptx_right     = 1; // end aligned
+    protected static final int ptx_centred   = 2; //
+    protected static final int ptx_justified = 3; // blocked, left and right aligned
+
 
     /** The parameter block for the functional text processing interface
      */
     protected class Ptx {
+        public int align;
         public int bold;
         public int underline;
         public Ptx() {
+            align     = 0;
             bold      = 0;
             underline = 0;
         }
@@ -266,6 +278,14 @@ public class TextConverter extends ByteTransformer {
         ptx.bold = status;
     } // put_bold
 
+    /** Puts a special character code
+     *  @param code the Unicode character to be output
+     *  @param codePage - for compatibility, ignored
+     */
+    protected void put_char_code(char code, int codePage) {
+        content.append(code);
+    } // put_char_code
+
     /** Emits a newline
      *  @param status one of the codes ptx_soft, ptx_hard and so on.
      */
@@ -275,13 +295,46 @@ public class TextConverter extends ByteTransformer {
                 break;
             default:
                 content.append("\r\n");
+            /*
             	fireContent();
-            	fireEmptyElement("br");
+            	fireStartElement("br");
+            */
                 break;
         } // switch status
     } // put_line
 
-    /** Emits a tab
+    /** Emits a new page
+     *  @param status one of the codes ptx_soft, ptx_hard
+     */
+    protected void put_page(int status) {
+        switch (status) {
+            case ptx_soft:
+            default:
+                content.append("\r\n");
+            	fireContent();
+                AttributesImpl attrs = new AttributesImpl();
+                attrs.addAttribute("", "style", "style", "CDATA", "page-break-before: always");
+                fireStartElement("span", attrs);
+            	fireEndElement  ("span");
+                break;
+        } // switch status
+    } // put_page
+
+    /** Emits a soft or hard space
+     *  @param status one of the codes ptx_soft, ptx_hard.
+     */
+    protected void put_space(int status) {
+        switch (status) {
+            case ptx_soft:
+                content.append(" ");
+                break;
+            default:
+                content.append("\u00a0");
+                break;
+        } // switch status
+    } // put_line
+
+    /** Emits a space
      */
     protected void put_tab() {
         content.append("\t");
