@@ -1,5 +1,6 @@
 /*  Emulation of putrans.c functional interface
     @(#) $Id: TextConverter.java 566 2010-10-19 16:32:04Z gfis $
+    2017-07-25: works for IBM6788
     2017-07-22: Georg Fischer
 */
 /*
