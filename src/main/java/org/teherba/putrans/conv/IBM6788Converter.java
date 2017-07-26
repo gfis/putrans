@@ -29,7 +29,7 @@ import  org.xml.sax.Attributes;
 import  org.xml.sax.SAXException;
 import  org.apache.log4j.Logger;
 
-/** Transformer for the text files of the IBM 6788 typewriter 
+/** Transformer for the text files of the IBM 6788 typewriter
  *  on 3.5" DS/DD floppy disks, also known as Wheelwriter 5000
  *  (in cooperation with Lexmark).
  *  Text is in EBCDIC, with escape sequences [2b nn ... nn 2b].
@@ -81,7 +81,7 @@ public class IBM6788Converter extends TextConverter {
 
     /** debugging switch */
     private int debug = 1;
-    
+
     /** EBCDIC maps */
     private EbcdicMap emap;
 
@@ -94,8 +94,8 @@ public class IBM6788Converter extends TextConverter {
      */
     public IBM6788Converter() {
         super();
-        setFormatCodes("ibm6788");
-        setDescription("IBM6788 / Wheelwriter");
+        setFormatCodes("ibm6788,6788,wheelwriter");
+        setDescription("IBM 6788 / Wheelwriter");
         setFileExtensions("txt");
     } // Constructor
 
@@ -122,10 +122,10 @@ public class IBM6788Converter extends TextConverter {
 
     /** Evaluates the d6 file header.
      *  Assume that a d6 bracket only occurs at the start of the file.
-     *  This first d6 header bracket is always 48 bytes long. 
-     *  It has the file's number ("nn=") 
-     *  followed by an LSB word for the file length (-0x48). 
-     *  At offset +8, there starts a 
+     *  This first d6 header bracket is always 48 bytes long.
+     *  It has the file's number ("nn=")
+     *  followed by an LSB word for the file length (-0x48).
+     *  At offset +8, there starts a
      *  variable list of words (for margins, tab stops?) which
      *  can be zero, and which are terminated by zeroes.
      *  <pre>
@@ -147,7 +147,7 @@ public class IBM6788Converter extends TextConverter {
         header.append(", 0x");
         header.append(String.format("%02x", ch7));
         int ind = 0;
-        long [] words = new long[0x20]; 
+        long [] words = new long[0x20];
         while (ind < 0x1e) { // decode
             words[ind] = genRecord.getLSB(ind * 2 + 8, 2);
             ind ++;
@@ -173,44 +173,44 @@ public class IBM6788Converter extends TextConverter {
     private void unknownCode(int ch4, int ch5) {
         content.append(String.format("{code %02x,%02x}", ch4, ch5));
      } // unknownCode
-    
+
     /** Evaluates an a6 bracket.
      *  Accents (2nd byte) are overprinted on EBCDIC characters (1st byte).
      *  With 08, some microstepping is achieved?
-     *  
+     *
      *  <pre>
      *  [2b a6 09 00 xx yy 09 a6 2b]        undecorated
      *  [2b a6 0b 00 22 d6 22 be 0b a6 2b]  Oacute, bold and underlined
-     *    0  1  2  3  4  5  6  7  8  9 10 11 
+     *    0  1  2  3  4  5  6  7  8  9 10 11
      *  </pre>
      */
     private void evalA6Code() {
-        int ch4 = bracket.charAt(4); // EBCDIC accent 
+        int ch4 = bracket.charAt(4); // EBCDIC accent
         int ch5 = bracket.charAt(5); // EBCDIC character to be accented
         if (bracket.length() > 9) { // when decorated, repeat the code form processInput (not exact)
             ch4 = bracket.charAt(5);
             ch5 = bracket.charAt(7);
             state = IN_DECOR;
             switch ((int) bracket.charAt(4)) {
-                case 0x20: 
+                case 0x20:
                     put_underline (ptx_on);
                     break;
-                case 0x21: 
+                case 0x21:
                     put_bold      (ptx_on);
                     break;
-                case 0x22: 
+                case 0x22:
                     put_bold      (ptx_on);
                     put_underline (ptx_on);
                     break;
                 default:
                     state = IN_TEXT; // unknown decoration
                     break;
-            } // switch (4)              
+            } // switch (4)
         } // decorated
-        
+
         switch (ch5) {
             case 0x08: // ignore, micro stepping ???
-                if (ch4 >= 0x20 && ch4 <= 0x2f) { 
+                if (ch4 >= 0x20 && ch4 <= 0x2f) {
                 } else {
                      unknownCode(ch4, ch5);
                 }
@@ -320,13 +320,14 @@ public class IBM6788Converter extends TextConverter {
     /** Evaluates an escape sequence and emits the appropriate formatting.
      *  Currently recognized are:
      *  <pre>
-     *  [2b a6 09 00 xx yy 09 a6 2b]        narrow/wide spaces? a6 = w
+     *  [2b a6 09 00 xx yy 09 a6 2b]        overprinting
      *  [2b a7 15 40 7f d9 85 89 a2 85 82 85 99 89 83 88
      *   a3 7f 15 a7 2b]                    title text in quotes? 7f = \"
      *  [2b c2 e0 01 c2 2b]                 tab, 2nd word is varying c2=B
      *  [2b c3 80 01 c3 2b]                 decimal tab? c3=C
      *  [2b d4 84 00 20 00 33 13 00 d4 2b]  put_line(ptx.soft)
-     *  [2b d5 6c 00 00 00 d5 2b]           ??? 
+     *  [2b d5 6c 00 00 00 d5 2b]           ???
+     *  [2b d6 ...                          file header with margin and tab settings ???
      *  </pre>
      */
     private void evalBracket () {
@@ -340,7 +341,8 @@ public class IBM6788Converter extends TextConverter {
                 dump2BBracket();
                 fireLineBreak();
                 break;
-             case 0xc2:
+            case 0xc2: // left ???
+            case 0xc3: // right or decimal ???
                 // put_tab();
                 break;
             case 0xd4:
@@ -376,7 +378,7 @@ public class IBM6788Converter extends TextConverter {
         bracket    = new StringBuffer(512);
     } // initialize
 
-    
+
     /** Processes a portion of the input file
      *  @param start offset where to start/resume scanning
      *  @param trap  offset behind last character to be processed
@@ -393,34 +395,34 @@ public class IBM6788Converter extends TextConverter {
 
                 case IN_TEXT:
                     switch (ch) {
-                        case 0x00: 
+                        case 0x00:
                             /* ignore nil */
                             break;
-                        case 0x06: 
+                        case 0x06:
                             put_line      (ptx_paragraph);
                             break;
-                        case 0x07: 
+                        case 0x07:
                             put_page      (ptx_hard);
                             break;
-                        case 0x15: 
+                        case 0x15:
                             put_line      (ptx_hard);
                             break;
-                        case 0x20: 
+                        case 0x20:
                             put_underline (ptx_on);
                             break;
-                        case 0x21: 
+                        case 0x21:
                             put_bold      (ptx_on);
                             break;
-                        case 0x22: 
+                        case 0x22:
                             put_bold      (ptx_on);
                             put_underline (ptx_on);
                             break;
-                        case 0x28: 
+                        case 0x28:
                             put_space     (ptx_hard);
                             break;
-                        case 0x29: 
+                        case 0x29:
                         case 0x2a:
-                            // ??? 
+                            // ???
                             break;
                         case 0x2b: // start of bracket
                             fireContent();
@@ -429,19 +431,19 @@ public class IBM6788Converter extends TextConverter {
                             state = IN_BRACKET;
                             break;
                         case 0x2c: // ???
-                        case 0x2d: 
+                        case 0x2d:
                         case 0x2e: // oth/DOCUM002.txt
-                        case 0x2f: 
+                        case 0x2f:
                             // for block adjustment ???, together with 2b a6 bracket; bra/DOCUM009.TXT
-                            // put_space     (ptx_soft); 
+                            // put_space     (ptx_soft);
                             break;
-                        case 0x30: 
+                        case 0x30:
                             // put_align(ptx_centred); start centred ???
                             break;
-                        case 0x31: 
+                        case 0x31:
                             // put_align(ptx_left); end   centred ???
                             break;
-                        case 0x33: 
+                        case 0x33:
                             // tra/DOCUM007.txt ???, no line break
                             break;
                         case 0x34:
@@ -481,13 +483,13 @@ public class IBM6788Converter extends TextConverter {
                                 put_underline (ptx_on);
                             }
                             break;
-                        case 0x21: 
+                        case 0x21:
                             if (ptx.underline > 0) {
                                 put_bold      (ptx_on);
                                 put_underline (ptx_off);
                             }
                             break;
-                        case 0x22: 
+                        case 0x22:
                             put_bold      (ptx_on);
                             put_underline (ptx_on);
                             break;

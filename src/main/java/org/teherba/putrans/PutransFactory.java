@@ -59,6 +59,7 @@ public class PutransFactory extends XtransFactory {
             // the order here defines the order in documentation.jsp,
             // should be: "... group by package order by package, name"
 
+            this.enable("putrans.TextConverter");
             this.enable("putrans.conv.IBM6788Converter");
             this.enable("xtrans.general.HexDumpTransformer");
             this.enable("xtrans.general.SeparatedTransformer");

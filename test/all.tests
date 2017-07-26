@@ -1,0 +1,44 @@
+# Collection of Testcases for Xtrans; UTF-8: äöüÄÖÜß
+# @(#) $Id$
+# 2017-07-26: copied from xtrans
+# 2016-09-16, Dr. Georg Fischer
+#-----------------------------------
+# Caution:
+# (1) Adjust the following line: URL where Putrans was deployed
+URL=http://localhost:8080/putrans/servlet
+# (2) Adjust the following line: default commandline arguments
+ARGS=
+# DIFF=diff -Z -s
+DIFF=diff -e -s
+PACKAGE=org.teherba.putrans
+#======================================================================
+
+#---------------------------------
+# text - simple
+
+TEST text1
+DATA 
+ package org.teherba.xtrans.general;
+ package org.teherba.xtrans.proglang;
+ import  org.teherba.xtrans.proglang.ProgLangTransformer;
+ public class JavaTransformer extends ProgLangTransformer {
+     /* ... */
+ } // JavaTransformer
+CALL Converter -text $(DATA) -text $(DATA).tmp
+DIFF $(DATA) $(DATA).tmp                    
+
+TEST text2
+DATA 
+ THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.
+ ÖL IM ÜBERFLUß MACHT DEN SCHEICHEN ÄRGER.
+ ÀÄÈÉÖÜßÑ
+ .,:;?-()'=+/@
+CALL Converter -text    $(DATA) -tee test/$(CASE).xml.tmp -text    $(DATA).tmp
+CALL Converter -xml                  test/$(CASE).xml.tmp
+DIFF $(DATA) $(DATA).tmp                    
+#---------------------------------
+# IBM 6788
+
+TEST IBM1
+CALL Converter -ibm6788 test/ibm6788/DOCUM002.TXT
+

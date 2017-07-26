@@ -28,9 +28,9 @@ import  org.xml.sax.SAXException;
 import  org.apache.log4j.Logger;
 
 /** This class replaces the functional interface for
- *  text processing systems as it was used by the Pascal and C 
- *  implementations of Putrans.      
- *                
+ *  text processing systems as it was used by the Pascal and C
+ *  implementations of Putrans.
+ *
  *  @author Dr. Georg Fischer
  */
 public class TextConverter extends ByteTransformer {
@@ -39,29 +39,22 @@ public class TextConverter extends ByteTransformer {
     /** log4j logger (category) */
     private Logger log;
 
-    /** Upper bound for input buffer */
+    /** Upper bound for input and SAX buffer */
     protected static final int MAX_BUF = 4096;
 
     /** Root element tag */
     protected static final String ROOT_TAG        = "html";
     /** Body element tag */
     protected static final String BODY_TAG        = "body";
-    /** Byte element tag */
-    protected static final String PRE_TAG         = "pre";
-    /** Header element tag */
+    /** br element tag */
+    protected static final String BR_TAG          = "br";
+    /** Head element tag */
     protected static final String HEAD_TAG        = "head";
-    /** Markup element tag */
-    protected static final String MARKUP_TAG      = "markup";
-    /** Ruler element tag */
-    protected static final String RULER_TAG       = "ruler";
-    /** Proportional text line element tag */
-    protected static final String PROP_TEXT_TAG   = "propText";
-    /** Text line element tag */
-    protected static final String TEXT_TAG        = "text";
-    /** Byte element tag */
-    protected static final String BYTE_TAG        = "bx";
-    /** Word element tag */
-    protected static final String WORD_TAG        = "wx";
+    /** p element tag */
+    protected static final String P_TAG           = "p";
+    /** pre element tag */
+    protected static final String PRE_TAG         = "pre";
+
     /** Attribute name for leading spaces */
     protected static final String SPACE_ATTR      = "sp";
 
@@ -89,7 +82,7 @@ public class TextConverter extends ByteTransformer {
 
     /** Buffer for a portion of the input file */
     // protected byte[] byteBuffer;
-    
+
     /** Record for the reader's buffer */
     protected ByteRecord genRecord;
 
@@ -105,8 +98,8 @@ public class TextConverter extends ByteTransformer {
     public TextConverter() {
         super();
         log = Logger.getLogger(TextConverter.class.getName());
-        setFormatCodes("ibm6788,6788,wheelwriter");
-        setDescription("IBM6788 / Wheelwriter");
+        setFormatCodes("text,plain");
+        setDescription("Plain Text");
         setFileExtensions("txt");
     } // Constructor
 
@@ -131,22 +124,6 @@ public class TextConverter extends ByteTransformer {
         }
     } // fireContent
 
-    /** Emits an arbitrary byte as hexadecimal code
-     *  @param ch byte to be output
-     */
-    protected void fireByte(char ch) {
-        fireContent();
-        fireEmptyElement(BYTE_TAG, toAttribute(BYTE_TAG, Integer.toHexString(ch)));
-    } // fireByte
-
-    /** Emits an arbitrary word (2 LSB bytes) as hexadecimal code
-     *  @param word word to be output
-     */
-    protected void fireWord(int word) {
-        fireContent();
-        fireEmptyElement(WORD_TAG, toAttribute(WORD_TAG, Integer.toHexString(word)));
-    } // fireByte
-
     /** Processes a portion of the input file
      *  @param start offset where to start/resume scanning
      *  @param trap  offset behind last character to be processed
@@ -163,11 +140,11 @@ public class TextConverter extends ByteTransformer {
 
                 case IN_TEXT:
                     switch (ch) {
-                        case 0x00: 
-                            /* ignore nil */
+                        case '\n':
+                            content.append(ch);
+                            fireContent();
                             break;
                         default:
-                            // ch = emap.ebc_asc[ch];
                             content.append(ch);
                             break;
                     } // switch ch
@@ -200,21 +177,21 @@ public class TextConverter extends ByteTransformer {
         try {
             fireStartDocument();
             fireStartRoot(ROOT_TAG);
-            fireLineBreak();
+        //    fireLineBreak();
             fireStartElement(BODY_TAG);
-            fireLineBreak();
+        //    fireLineBreak();
             fireStartElement(PRE_TAG);
-            fireLineBreak();
+        //    fireLineBreak();
             while ((len = genRecord.read(byteReader)) >= 0) {
                 len = processInput(0, len);
             } // while reading
             fireContent();
             fireEndElement(PRE_TAG);
-            fireLineBreak();
+        //    fireLineBreak();
             fireEndElement(BODY_TAG);
-            fireLineBreak();
+        //    fireLineBreak();
             fireEndElement(ROOT_TAG);
-            fireLineBreak();
+        //    fireLineBreak();
             fireEndDocument();
         } catch (Exception exc) {
             log.error(exc.getMessage(), exc);
@@ -234,8 +211,8 @@ public class TextConverter extends ByteTransformer {
     protected static final int ptx_hard      = 2;
     protected static final int ptx_soft_eol  = 3;
     protected static final int ptx_paragraph = 4;
-    protected static final int ptx_normal    = 5;                
-    protected static final int ptx_break     = 6; // similiar to hard 
+    protected static final int ptx_normal    = 5;
+    protected static final int ptx_break     = 6; // similiar to hard
     // Parameter 'status of 'put_align'
     protected static final int ptx_left      = 0; // start aligned (default)
     protected static final int ptx_right     = 1; // end aligned
@@ -258,9 +235,9 @@ public class TextConverter extends ByteTransformer {
 
     /** Instance of the parameter block */
     protected Ptx ptx;
-        
+
     /** Starts or ends bold text
-     *  @param status off or on 
+     *  @param status off or on
      */
     protected void put_bold(int status) {
         fireContent();
@@ -268,7 +245,7 @@ public class TextConverter extends ByteTransformer {
             case 0:
                 if (ptx.bold >  0) {
                     fireEndElement("strong");
-                } 
+                }
                 break;
             default:
                 if (ptx.bold == 0) {
@@ -297,8 +274,8 @@ public class TextConverter extends ByteTransformer {
             default:
                 content.append("\r\n");
             /*
-            	fireContent();
-            	fireStartElement("br");
+                fireContent();
+                fireStartElement("br");
             */
                 break;
         } // switch status
@@ -312,11 +289,11 @@ public class TextConverter extends ByteTransformer {
             case ptx_soft:
             default:
                 content.append("\r\n");
-            	fireContent();
+                fireContent();
                 AttributesImpl attrs = new AttributesImpl();
                 attrs.addAttribute("", "style", "style", "CDATA", "page-break-before: always");
                 fireStartElement("span", attrs);
-            	fireEndElement  ("span");
+                fireEndElement  ("span");
                 break;
         } // switch status
     } // put_page
@@ -357,7 +334,7 @@ public class TextConverter extends ByteTransformer {
             case 0:
                 if (ptx.underline >  0) {
                     fireEndElement("u");
-                } 
+                }
                 break;
             default:
                 if (ptx.underline == 0) {
@@ -405,6 +382,18 @@ public class TextConverter extends ByteTransformer {
         elem = "";
     } // startDocument
 
+    /** Receive notification of the end of the document.
+     */
+    public void endDocument() 
+            throws SAXException {
+        try {
+            byteWriter.write(saxBuffer, 0, saxPos);
+            saxPos = 0;
+        } catch (Exception exc) {
+            throw new SAXException(exc.getMessage());
+        }
+    } // endDocument
+
     /** Receive notification of the start of an element.
      *  Looks for the element which contains raw lines.
      *  @param uri The Namespace URI, or the empty string if the element has no Namespace URI
@@ -427,49 +416,10 @@ public class TextConverter extends ByteTransformer {
             if (false) {
             } else if (qName.equals(ROOT_TAG        )) {
                 // ignore
-            } else if (qName.equals(BYTE_TAG        )) {
-                flushLine();
-                putLSB(attrs.getValue(BYTE_TAG  ), 1, true);
-            } else if (qName.equals(HEAD_TAG        )) {
-            } else if (qName.equals(MARKUP_TAG      )) {
-                byteWriter.write(0x10);
-            } else if (qName.equals(PROP_TEXT_TAG   )) {
-                byteWriter.write(0x12);
-                putLSB(attrs.getValue(SPACE_ATTR), 1, false);
-            } else if (qName.equals(RULER_TAG       )) {
-                byteWriter.write(0x80);
-            } else if (qName.equals(TEXT_TAG        )) {
-                byteWriter.write(0x0d);
-                putLSB(attrs.getValue(SPACE_ATTR), 1, false);
-            } else if (qName.equals(WORD_TAG        )) {
-                flushLine();
-                putLSB(attrs.getValue(WORD_TAG  ), 2, true);
-            } else if (qName.equals("b"         )) {
-                saxBuffer[saxPos ++] = 0x02;
-            } else if (qName.equals("u"         )) {
-                saxBuffer[saxPos ++] = 0x03;
-            } else if (qName.equals("sup"       )) {
-                saxBuffer[saxPos ++] = 0x04;
-            } else if (qName.equals("sub"       )) {
-                saxBuffer[saxPos ++] = 0x05;
-            } else if (qName.equals("i"         )) {
-                saxBuffer[saxPos ++] = 0x06;
-            } else if (qName.equals("shy"       )) {
-                if (false) { // problems with 2-byte ISO 6937 accented characters
-                saxBuffer[saxPos] = saxBuffer[saxPos - 1];
-                saxBuffer[saxPos - 1] = 0x07; // insert before last character
-                saxPos ++;
-                } else {
-                saxBuffer[saxPos ++] = 0x07;
-                }
-            } else if (qName.equals("tab"           )) {
-                saxBuffer[saxPos ++] = 0x08;
-            } else if (qName.equals("strike"        )) {
-                saxBuffer[saxPos ++] = 0x13;
-             } else if (qName.equals("para"         )) {
-                saxBuffer[saxPos ++] = 0x1f;
-            } else if (qName.equals("nbsp"          )) {
-                saxBuffer[saxPos ++] = (byte) 0xa0;
+            } else if (qName.equals(BR_TAG          ) ||
+                       qName.equals(P_TAG           )) {
+               saxBuffer[saxPos ++] = (byte) '\r';
+               saxBuffer[saxPos ++] = (byte) '\n';
             } else {
             }
         } catch (Exception exc) {
@@ -497,21 +447,6 @@ public class TextConverter extends ByteTransformer {
         try {
             if (false) {
             } else if (qName.equals(ROOT_TAG        )) {
-                flushLine();
-            } else if (qName.equals(HEAD_TAG        )) {
-                flushLine();
-            } else if (qName.equals(MARKUP_TAG      )) {
-                flushLine();
-                byteWriter.write(EOS);
-            } else if (qName.equals(PROP_TEXT_TAG   )) {
-                flushLine();
-                byteWriter.write(EOS);
-            } else if (qName.equals(RULER_TAG       )) {
-                flushLine();
-                byteWriter.write(EOS);
-            } else if (qName.equals(TEXT_TAG        )) {
-                flushLine();
-                byteWriter.write(EOS);
             } else {
                 // all other elements are empty - ignore their end tags
             }
@@ -533,27 +468,19 @@ public class TextConverter extends ByteTransformer {
                 int pos = 0;
                 while (pos < len) {
                     char chx = ch[start ++];
-                    if (chx == '\n' || chx == '\r') {
-                        // ignore
-                    } else if (chx >= 0x20 && chx <= 0x7e) { // normal printable ASCII character
-                        saxBuffer[saxPos ++] = (byte) chx;
-                    } else if (chx >= 0x80) { // accented or from table
-                        int value = 0; // saxIsoMap.getIsocode(chx);
-                        if (value == 0) {
-                            saxBuffer[saxPos ++] = (byte) '?';
-                        } else if (value >= 0x100) {
-                            saxBuffer[saxPos ++] = (byte) (value >> 8);
-                            saxBuffer[saxPos ++] = (byte) (value & 0xff);
-                        } else {
-                            saxBuffer[saxPos ++] = (byte) (value & 0xff);
-                        }
+                    if (false) {
                     } else {
                         saxBuffer[saxPos ++] = (byte) chx;
+                        if (saxPos >= MAX_BUF) {
+                            byteWriter.write(saxBuffer, 0, saxPos);
+                            saxPos = 0;
+                        }
                     }
                     pos ++;
                 } // while pos
             } // else ignore characters in unknown elements
         } catch (Exception exc) {
+            System.err.println(exc.getMessage());
             throw new SAXException(exc.getMessage());
         }
     } // characters
