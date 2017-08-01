@@ -25,6 +25,7 @@ package org.teherba.putrans.conv;
 import  org.teherba.putrans.TextConverter;
 import  org.teherba.putrans.EbcdicMap;
 import  org.teherba.xtrans.ByteRecord;
+import  javax.xml.bind.DatatypeConverter;
 import  org.xml.sax.Attributes;
 import  org.xml.sax.SAXException;
 import  org.apache.log4j.Logger;
@@ -45,32 +46,45 @@ import  org.apache.log4j.Logger;
 <pre>
     dump -e ../client.../Originale/d03/DOCUM048
 
-                  3    fsize ??  word1 word2 word3 word4
+              " 2"     fsize 80  word0 word1 word2 word3
 +   0
-     0: 2b d6 40 f3 40 da  2 80  48    5a    34  3 5a      O 3  . ..]. .].
-    10: 34  3                                              ...............
-    20:                                                   ................ ===
-    40:                   d6 2b  2b d4 5a       10 33 13  ......O  M]... .
-    50: 63 d4 2b a6 89 99 40 88  96 86 86 85 95 6b 40 84  .M wir hoffen, d
-    60: 81 a2 a2 40 85 a2 40 c5  a4 83 88 6b 40 84 85 95  ass es Euch, den
-    70: 40 97 85 99 a2 cc 95 93  89 83 88 85 95 40 e4 94   pers.nlichen Um
-    80: a2 a3 43 95 84 85 95 40  85 95 a3 a2 97 99 85 83  st.nden entsprec
-    90: 88 85 95 84 6b 40 a2 96  a6 85 89 a3 40  6 2b d4  hend, soweit   M
-    a0: 5a    20    33 13  3 d4  2b 87 a4 a3 40 87 85 88  ]. . ..M gut geh
-    b0: a3 40 a4 95 84 40 c9 88  99 40 c5 a4 83 88 40 a5  t und Ihr Euch v
-    c0: 96 95 40 a4 95 a2 85 99  85 94 40 21 7f 21 e2 21  on unserem  " S
-...
-   2b0: 81 84 89 95 40 a9 a4 a9  a4 a2 85 95 84 85 95 4b  adin zuzusenden.
-   2c0: 40  6 2b d4 5a    20     33 13  3 d4 2b  6 2b d4     M]. . ..M   M
-   2d0: 5a    20    33 13  3 d4  2b c9 95 84 85 94 40 a6  ]. . ..M Indem w
-   2e0: 89 99 40 c5 a4 83 88 40  a6 85 89 a3 85 99 88 89  ir Euch weiterhi
-   2f0: 95 40 81 93 93 85 a2 40  c7 a4 a3 85 40 a6 dc 95  n alles Gute w.n
+     0: 2b d6 40 f2 7e ae  d 80  48    60    f0  3 60      O 2= . ..-.0.-.
+    10: f0  3 6c    90    f0     4c  2 d0  2              0.%. .0.<.}.....
+    20:                                                   ................ ====
+    40:                   d6 2b  2b d4 60       10 1d  1  ......O  M-.....
+    50: 60 d4 2b 40 40 40 40 40  40 40 40 40 40 40 40 40  -M
+    60: 40 40 40 40 40 40 40 40  40 40 40 40 22 e3 20 40               T
+    70: 20 40 22 c5 20 40 20 40  22 e2 20 40 20 40 22 e3     E     S     T
+    80: 28  6 2b d4 60    20     1d  1    d4 2b 28  6 2b     M-. ....M
+    90: d4 60    20    1d  1     d4 2b 40 40 40 40 40 40  M-. ....M
+    a0: 40 40 40 40 40 40 40 40  40 40 40 40 40 40 40 40
+    b0: 40 40 40 40 40 40 84 85  99 28  6 2b d4 60    20        der   M-.
+    c0:    1d  1    d4 2b 28 28  28 28 28 28 28 28  6 2b  ....M
+    d0: d4 60    20    1d  1     d4 2b 40 40 40 40 40 40  M-. ....M
+    e0: 40 40 40 40 40 40 40 40  c9 40 c2 40 d4 40 60 40          I B M -
+    f0: c2 89 93 84 a2 83 88 89  99 94 a2 83 88 99 85 89  Bildschirmschrei
 
-   300: a2 83 88 85 95 6b 40 a5  85 99 82 93 85 89 82 85  schen, verbleibe
-   310: 95 40 a6 89 99 40 86 dc  99 40 88 85 a4 a3 85 40  n wir f.r heute
-   320: 60 40                                             - ..............
-   330:                                                   ................
-</pre>
+   100: 82 94 81 a2 83 88 89 95  85 28 28 28 28 28 28 28  bmaschine
+   110: 28 28 28 28 28 28 28 28  28 28 28 28 28 28 28 28
+   120: 28 28 28  6 2b d4 60     20    1d  1    d4 2b 60       M-. ....M -
+   130: 60 60 60 60 60 60 60 60  60 60 60 60 60 60 60 60  ---------------- ====
+   170: 60 60 28  6 2b d4 60     20    1d  1    d4 2b 28  --   M-. ....M
+   180: 28 28 28 28 28 28 28  6  2b d4 60    20    1d  1           M-. ...
+   190:    d4 2b 28  6 2b d4 60     20    1d  1    d4 2b  .M    M-. ....M
+   1a0: d4 89 a3 40 84 85 99 40  e3 81 a2 a3 85 40 21 d4  Mit der Taste  M
+   1b0: 21 85 21 95 21 dc 40 92  81 95 95 40 86 96 93 87   e n . kann folg
+   1c0: 85 95 84 85 a2 40 87 85  a6 43 88 93 a3 40 a6 85  endes gew.hlt we
+   1d0: 99 84 85 95 40 7a  6 2b  d4 60    20    1d  1     rden :  M-. ....
+   1e0: d4 2b 28 28 28 28 28 28  28 28 28 28 28 28 28 28  M
+   1f0: 28 28 28 28 28  6 2b d4  60    20    1d  1    d4         M-. ....M
+...
+   db0: d4 2b 84 85 a2 40 e2 97  85 89 83 88 85 99 a2 40  M des Speichers
+   dc0: a6 43 88 93 85 95  6 2b  d4 60    20    1d  1     w.hlen  M-. ....
+   dd0: d4 2b  6 2b d4 60    20     1d  1    d4 2b  6 2b  M   M-. ....M
+   de0: d4 60    20    1d  1     d4 2b  6 2b d4 60    20  M-. ....M   M-.
+   df0:    1d  1    d4 2b                                 ....M ..........
++   7
+   e00:                                                   ................</pre>
  *  @author Dr. Georg Fischer
  */
 public class IBM6788Converter extends TextConverter {
@@ -512,5 +526,191 @@ public class IBM6788Converter extends TextConverter {
         } // while processing
         return ibuf; // new 'start'
     } // processInput
+
+    /*===========================*/
+    /* SAX handler for XML input */
+    /*===========================*/
+
+    /** Append a bracket to the saxRecord,
+     *  fill it with zeroes if necessary, and append the tail
+     *  @param bracket array of bytes 2b xx ...
+     *  @param number of 2-byte LSB words to be appended
+     */
+    private void putBracket(byte[] bracket, int[] words) {
+        int ind = 0;
+        while (ind < bracket.length) {
+            saxRecord.set1(bracket[ind]);
+            ind ++;
+        } // while ind bracket
+        ind = 0;
+        while (ind < words.length) {
+            saxRecord.setLSB(2, words[ind]);
+            ind ++;
+        } // while ind bracket
+        saxRecord.set1(bracket[1]);
+        saxRecord.set1(bracket[0]);
+    } // putBracket
+
+    /** Append a bracket to the saxRecord
+     *  @param bracket array of bytes 2b xx ... xx 2b
+     */
+    private void putBracket(byte[] bracket) {
+        int ind = 0;
+        while (ind < bracket.length) {
+            saxRecord.set1(bracket[ind]);
+            ind ++;
+        } // while ind
+    } // putBracket
+
+    /** Upper bound for input buffer */
+    protected static final int MAX_SAX = 65536 * 2;
+
+    /** bracket for line start */
+    private byte[] margins;
+
+    /** Receive notification of the beginning of the document.
+     */
+    public void startDocument() {
+        saxRecord = new ByteRecord(MAX_SAX); // a rather long line
+        elem = "";
+        // write a temporary header, insert file length in endDocument
+/*
+<!-- head.6788:  2=, size= 3574, 0x80, words=   72   96 1008   96 1008  108  144  240  588  720
+--><!--
+[2b d6 40 f2 7e ae 0d 80 48 00 60 00 f0 03 60 00
+ f0 03 6c 00 90 00 f0 00 4c 02 d0 02 00 00 00 00
+ 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+ 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+ 00 00 00 00 00 00 d6 2b]-->
+ */
+        putBracket(DatatypeConverter.parseHexBinary(
+                "2b d6 40 f2 7e ae 0d 80"
+                .replaceAll(" ", ""))
+                ,  new int [] { 72, 96, 1008, 96
+                , 1008, 108, 144, 240, 588, 720, 0, 0
+                , 0,0,0,0,0,0,0
+                , 0,0,0,0,0,0,0
+                , 0,0,0,0,0     } );
+        margins = DatatypeConverter.parseHexBinary(
+                "2b d4 60 00 20 00 1d 01 00 d4 2b"
+                .replaceAll(" ", ""));
+        putBracket(margins);
+    } // startDocument
+
+    /** Receive notification of the end of the document.
+     */
+    public void endDocument()
+            throws SAXException {
+        try {
+            int fsize = saxRecord.getPosition();
+            saxRecord.setLSB(5, 2, fsize - 0x48); // replace the size in the header
+            saxRecord.setPosition(fsize);
+            flushLine();
+        } catch (Exception exc) {
+            throw new SAXException(exc.getMessage());
+        }
+    } // endDocument
+
+    /** Receive notification of the start of an element.
+     *  Looks for the element which contains raw lines.
+     *  @param uri The Namespace URI, or the empty string if the element has no Namespace URI
+     *  or if Namespace processing is not being performed.
+     *  @param localName the local name (without prefix),
+     *  or the empty string if namespace processing is not being performed.
+     *  @param qName the qualified name (with prefix),
+     *  or the empty string if qualified names are not available.
+     *  @param attrs the attributes attached to the element.
+     *  If there are no attributes, it shall be an empty Attributes object.
+     *  @throws SAXException for SAX errors
+     */
+    public void startElement(String uri, String localName, String qName, Attributes attrs)
+            throws SAXException {
+        if (namespace.length() > 0 && qName.startsWith(namespace)) {
+            qName = qName.substring(namespace.length());
+        }
+        elem = qName;
+        try {
+            if (false) {
+            } else if (qName.equals(ROOT_TAG        )) {
+                // ignore
+            } else if (qName.equals(BR_TAG          ) ||
+                       qName.equals(P_TAG           )) {
+                saxRecord.setString(2, "\r\n");
+            } else {
+            }
+        } catch (Exception exc) {
+            throw new SAXException(exc.getMessage());
+        }
+    } // startElement
+
+    /** Receive notification of the end of an element.
+     *  Looks for the element which contains raw lines.
+     *  Terminates the line.
+     *  @param uri the Namespace URI, or the empty string if the element has no Namespace URI
+     *  or if Namespace processing is not being performed.
+     *  @param localName the local name (without prefix),
+     *  or the empty string if Namespace processing is not being performed.
+     *  @param qName the qualified name (with prefix),
+     *  or the empty string if qualified names are not available.
+     *  @throws SAXException for SAX errors
+     */
+    public void endElement(String uri, String localName, String qName)
+            throws SAXException {
+        if (namespace.length() > 0 && qName.startsWith(namespace)) {
+            qName = qName.substring(namespace.length());
+        }
+        elem = "";
+        try {
+            if (false) {
+            } else if (qName.equals(ROOT_TAG        )) {
+            } else {
+                // all other elements are empty - ignore their end tags
+            }
+        } catch (Exception exc) {
+            throw new SAXException(exc.getMessage());
+        }
+    } // endElement
+
+    /** Receive notification of character data inside an element.
+     *  @param ch the characters.
+     *  @param start the start position in the character array.
+     *  @param len the number of characters to use from the character array.
+     *  @throws SAXException for SAX errors
+     */
+    public void characters(char[] ch, int start, int len)
+            throws SAXException {
+        char chx = ' ';
+        try {
+            if (true) {
+                int pos = 0;
+                while (pos < len) {
+                    chx = ch[start ++];
+                    switch (chx) {
+                        case 0x0d: // ignore CR
+                            break;
+                        case 0x0a: // newline
+                            saxRecord.set1(0x06);
+                            putBracket(margins);
+                            break;
+                        default:
+                            saxRecord.set1((byte) emap.asc_ebc[chx]);
+                            /* assume that the saxRecord is big enough for the whole file
+                            if (saxRecord.currentPos >= MAX_SAX) {
+                               flushLine();
+                            }
+                            */
+                            break;
+                    } // switch chx
+                    pos ++;
+                } // while pos
+            } // else ignore characters in unknown elements
+        } catch (Exception exc) {
+            System.err.println("IBM6788Converter.characters"
+                    + ", pos = " + saxRecord.getPosition()
+                    + ", chx=" + String.format("%02x", (int) chx)
+                    + ", message=" + exc.getMessage());
+            throw new SAXException(exc.getMessage());
+        }
+    } // characters
 
 } // IBM6788Converter

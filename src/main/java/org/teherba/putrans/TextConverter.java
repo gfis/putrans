@@ -39,7 +39,7 @@ public class TextConverter extends ByteTransformer {
     /** log4j logger (category) */
     private Logger log;
 
-    /** Upper bound for input and SAX buffer */
+    /** Upper bound for input buffer */
     protected static final int MAX_BUF = 4096;
 
     /** Root element tag */
@@ -355,20 +355,20 @@ public class TextConverter extends ByteTransformer {
     /* SAX handler for XML input */
     /*===========================*/
 
+    /** Upper bound for input buffer */
+    protected static final int MAX_SAX = 4096;
     /** buffer for output line */
-    private byte[] saxBuffer;
-    /** current position in <em>saxBuffer</em> */
-    private int saxPos;
+    protected ByteRecord saxRecord;
 
     /** currently opened element */
-    private String elem;
+    protected String elem;
 
     /** Terminate and write a logical line
      */
     public void flushLine() {
         try {
-            byteWriter.write(saxBuffer, 0, saxPos);
-            saxPos = 0;
+            saxRecord.write(byteWriter, saxRecord.getPosition());
+            saxRecord.setPosition(0);
         } catch (Exception exc) {
             log.error(exc.getMessage(), exc);
         }
@@ -377,18 +377,16 @@ public class TextConverter extends ByteTransformer {
     /** Receive notification of the beginning of the document.
      */
     public void startDocument() {
-        saxBuffer = new byte[MAX_BUF]; // a rather long line
-        saxPos = 0;
+        saxRecord = new ByteRecord(MAX_SAX); // a rather long line
         elem = "";
     } // startDocument
 
     /** Receive notification of the end of the document.
      */
-    public void endDocument() 
+    public void endDocument()
             throws SAXException {
         try {
-            byteWriter.write(saxBuffer, 0, saxPos);
-            saxPos = 0;
+            flushLine();
         } catch (Exception exc) {
             throw new SAXException(exc.getMessage());
         }
@@ -418,8 +416,7 @@ public class TextConverter extends ByteTransformer {
                 // ignore
             } else if (qName.equals(BR_TAG          ) ||
                        qName.equals(P_TAG           )) {
-               saxBuffer[saxPos ++] = (byte) '\r';
-               saxBuffer[saxPos ++] = (byte) '\n';
+                saxRecord.setString(2, "\r\n");
             } else {
             }
         } catch (Exception exc) {
@@ -470,10 +467,9 @@ public class TextConverter extends ByteTransformer {
                     char chx = ch[start ++];
                     if (false) {
                     } else {
-                        saxBuffer[saxPos ++] = (byte) chx;
-                        if (saxPos >= MAX_BUF) {
-                            byteWriter.write(saxBuffer, 0, saxPos);
-                            saxPos = 0;
+                        saxRecord.set1((byte) chx);
+                        if (saxRecord.getPosition() >= MAX_SAX) {
+                            flushLine();
                         }
                     }
                     pos ++;
