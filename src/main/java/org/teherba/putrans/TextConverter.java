@@ -25,7 +25,8 @@ import  org.teherba.xtrans.ByteTransformer;
 import  org.xml.sax.Attributes;
 import  org.xml.sax.helpers.AttributesImpl;
 import  org.xml.sax.SAXException;
-import  org.apache.log4j.Logger;
+import  org.apache.logging.log4j.Logger;
+import  org.apache.logging.log4j.LogManager;
 
 /** This class replaces the functional interface for
  *  text processing systems as it was used by the Pascal and C
@@ -97,7 +98,7 @@ public class TextConverter extends ByteTransformer {
      */
     public TextConverter() {
         super();
-        log = Logger.getLogger(TextConverter.class.getName());
+        log = LogManager.getLogger(TextConverter.class.getName());
         setFormatCodes("text,plain");
         setDescription("Plain Text");
         setFileExtensions("txt");

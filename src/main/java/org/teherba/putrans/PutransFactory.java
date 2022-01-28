@@ -31,7 +31,8 @@ import  java.util.ArrayList;
 import  java.util.Iterator;
 import  java.util.Properties;
 import  java.util.StringTokenizer;
-import  org.apache.log4j.Logger;
+import  org.apache.logging.log4j.Logger;
+import  org.apache.logging.log4j.LogManager;
 
 /** Selects a specific converter, and iterates over the descriptions
  *  of all converters and their codes.
@@ -51,7 +52,7 @@ public class PutransFactory extends XtransFactory {
      */
     public PutransFactory() {
         super();
-        log        = Logger.getLogger(PutransFactory.class.getName());
+        log        = LogManager.getLogger(PutransFactory.class.getName());
         realPath   = "";
         saxFactory = getSAXFactory();
         try {

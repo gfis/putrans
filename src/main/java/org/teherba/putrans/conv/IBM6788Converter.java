@@ -28,7 +28,8 @@ import  org.teherba.xtrans.ByteRecord;
 import  javax.xml.bind.DatatypeConverter;
 import  org.xml.sax.Attributes;
 import  org.xml.sax.SAXException;
-import  org.apache.log4j.Logger;
+import  org.apache.logging.log4j.Logger;
+import  org.apache.logging.log4j.LogManager;
 
 /** Transformer for the text files of the IBM 6788 typewriter
  *  on 3.5" DS/DD floppy disks, also known as Wheelwriter 5000
@@ -387,7 +388,7 @@ public class IBM6788Converter extends TextConverter {
      */
     public void initialize() {
         super.initialize();
-        log        = Logger.getLogger(IBM6788Converter.class.getName());
+        log        = LogManager.getLogger(IBM6788Converter.class.getName());
         emap       = new EbcdicMap();
         bracket    = new StringBuffer(512);
     } // initialize

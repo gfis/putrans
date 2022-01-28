@@ -20,7 +20,8 @@
  */
 
 package org.teherba.putrans;
-import  org.apache.log4j.Logger;
+import  org.apache.logging.log4j.Logger;
+import  org.apache.logging.log4j.LogManager;
 
 /** Generates the code mappings for IBM's EBCDIC character set.
  *  The code tables are taken from Java's Codepage 1047.
@@ -42,7 +43,7 @@ public class EbcdicMap {
     /** Initializes mappings for the ISO 6937 character set.
      */
     public EbcdicMap() {
-        log = Logger.getLogger(EbcdicMap.class.getName());
+        log = LogManager.getLogger(EbcdicMap.class.getName());
         initialize();
     } // Constructor 0
 
